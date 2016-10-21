@@ -1,6 +1,8 @@
 "*":
   autosave:
     enabled: true
+  "color-picker":
+    preferredFormat: "HEX"
   core:
     telemetryConsent: "no"
   editor:
@@ -10,3 +12,5 @@
   minimap:
     adjustAbsoluteModeHeight: true
   "tree-view": {}
+  welcome:
+    showOnStartup: false
