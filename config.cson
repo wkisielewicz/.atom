@@ -4,7 +4,7 @@
   core:
     telemetryConsent: "no"
   editor:
-    fontSize: 12
+    fontSize: 9
   "exception-reporting":
     userId: "10b4654b-9d95-3bda-8c23-ae15a941e8a3"
   minimap:
