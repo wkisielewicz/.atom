@@ -1,6 +1,6 @@
 'atom-workspace':
    'ctrl-shift-q': 'git-plus:push'
-   
+   'ctrl-shift-g d': 'git-plus:diff'
 # Your keymap
 #
 # Atom keymaps work similarly to style sheets. Just as style sheets use
