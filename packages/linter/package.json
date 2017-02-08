@@ -2,40 +2,40 @@
   "_args": [
     [
       {
-        "raw": "/tmp/d-116921-18393-1kvnamq/package.tgz",
+        "raw": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
         "scope": null,
         "escapedName": null,
         "name": null,
-        "rawSpec": "/tmp/d-116921-18393-1kvnamq/package.tgz",
-        "spec": "/tmp/d-116921-18393-1kvnamq/package.tgz",
+        "rawSpec": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
+        "spec": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
         "type": "local"
       },
-      "/tmp/apm-install-dir-116921-18393-16fki11"
+      "C:\\Users\\kisiel\\AppData\\Local\\Temp\\apm-install-dir-11718-10964-w4vx83"
     ]
   ],
-  "_from": "../d-116921-18393-1kvnamq/package.tgz",
-  "_id": "linter@1.11.18",
+  "_from": "..\\d-11718-10964-162hy80\\package.tgz",
+  "_id": "linter@1.11.21",
   "_inCache": true,
   "_installable": true,
   "_location": "/linter",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "/tmp/d-116921-18393-1kvnamq/package.tgz",
+    "raw": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
     "scope": null,
     "escapedName": null,
     "name": null,
-    "rawSpec": "/tmp/d-116921-18393-1kvnamq/package.tgz",
-    "spec": "/tmp/d-116921-18393-1kvnamq/package.tgz",
+    "rawSpec": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
+    "spec": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
     "type": "local"
   },
   "_requiredBy": [
     "#USER"
   ],
-  "_resolved": "file:../d-116921-18393-1kvnamq/package.tgz",
-  "_shasum": "5169f5a4ac6ac03953a8e100220ef4138250f13e",
+  "_resolved": "file:..\\d-11718-10964-162hy80\\package.tgz",
+  "_shasum": "03a2ae350e04482afb21aa9408018537f5768ea0",
   "_shrinkwrap": null,
-  "_spec": "/tmp/d-116921-18393-1kvnamq/package.tgz",
-  "_where": "/tmp/apm-install-dir-116921-18393-16fki11",
+  "_spec": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\d-11718-10964-162hy80\\package.tgz",
+  "_where": "C:\\Users\\kisiel\\AppData\\Local\\Temp\\apm-install-dir-11718-10964-w4vx83",
   "author": {
     "name": "atom-community"
   },
@@ -61,7 +61,7 @@
   "description": "A Base Linter with Cow Powers",
   "devDependencies": {},
   "engines": {
-    "atom": ">=0.174.0 <2.0.0"
+    "atom": ">=1.13.0 <2.0.0"
   },
   "homepage": "https://github.com/atom-community/linter#readme",
   "license": "MIT",
@@ -89,5 +89,5 @@
   "scripts": {
     "lint": "coffeelint lib && eslint lib"
   },
-  "version": "1.11.18"
+  "version": "1.11.21"
 }

@@ -1,21 +1,30 @@
 (function() {
-	var _ = require('underscore');
+	var _ = require('underscore-plus');
 	var path = require('path');
 	var registry = atom.grammars;
 
-	var baseGrammar = registry.readGrammarSync(path.join(__dirname, 'diff.json'));
-	baseGrammar.packageName = 'git-plus';
+	var baseWordGrammar = registry.readGrammarSync(path.join(__dirname, 'word-diff.json'));
+	baseWordGrammar.packageName = 'git-plus';
+	var wordGrammar = Object.create(baseWordGrammar);
+	wordGrammar.tokenizeLine = tokenizeLine;
 
-	var diffGrammar = Object.create(baseGrammar);
-	diffGrammar.tokenizeLine = function(line, ruleStack, firstLine) {
+	var baseLineGrammar = registry.readGrammarSync(path.join(__dirname, 'line-diff.json'));
+	baseLineGrammar.packageName = 'git-plus';
+	var lineGrammar = Object.create(baseLineGrammar);
+	lineGrammar.tokenizeLine = tokenizeLine;
+
+	module.exports = {
+		wordGrammar: wordGrammar,
+		lineGrammar: lineGrammar
+	};
+
+	function tokenizeLine(line, ruleStack, firstLine) {
 		var grammar = null;
 		var codeStack = [];
 		var stack = ruleStack;
 		var tagStack = [];
 		if (stack && stack.length > 1) {
-			var grammarIndex = _.findIndex(stack, function(item) {
-				return _.isUndefined(item.rule);
-			});
+			var grammarIndex = stack.findIndex(item => _.isUndefined(item.rule));
 			if (grammarIndex !== -1) {
 				codeStack = stack.slice(grammarIndex + 1);
 				grammar = stack[grammarIndex];
@@ -35,7 +44,7 @@
 		}
 		if (!grammar && stack && stack.length == 1) {
 			for (var i = 0; i < tokens.length; i++) {
-				var isFileName = _.any(tokens[i].scopes, function(scope) {
+				var isFileName = tokens[i].scopes.some(scope => {
 					return scope.indexOf('header.from-file') != -1 ||
 						scope.indexOf('header.to-file') != -1;
 				});
@@ -43,6 +52,9 @@
 					var ext = path.extname(tokens[i].value);
 					if (ext && ext !== '') {
 						var grammar = atom.grammars.selectGrammar(tokens[i].value);
+            if (grammar.scopeName) {
+              grammar = atom.grammars.grammarForScopeName(grammar.scopeName);
+            }
 					}
 				}
 			}
@@ -54,7 +66,7 @@
 			tags = res.tags;
 			codeStack = res.codeStack;
 
-			if (line.indexOf('diff --git a/') !== 0) {} else {
+			if (line.indexOf('diff --git a/') === 0) {
 				grammar = null;
 			}
 		}
@@ -66,8 +78,6 @@
 		}
 		return _.extend(tokenizeResult, { tags: tags, ruleStack: stack, openScopeTags: openScopeTags });
 	};
-
-	module.exports = diffGrammar;
 
 	function runCodeGrammar(grammar, tags, tokens, tokenTagIndices, codeStack) {
 		var removedLine = "";
@@ -96,7 +106,7 @@
 			removedResult = grammar.tokenizeLine(removedLine, codeStack);
 			removedIdx = removedLine.length;
 		}
-		if (addedLine && addedLine.trim().length) {
+		if (addedLine && addedLine.trim().length !== undefined) {
 			addedResult = grammar.tokenizeLine(addedLine, codeStack);
 			addedIdx = addedLine.length;
 		}
@@ -130,10 +140,10 @@
 			removedIdx = _.isUndefined(newIdx.removed) ? removedIdx : newIdx.removed;
 			addedIdx = _.isUndefined(newIdx.added) ? addedIdx : newIdx.added;
 			if (_.contains(tokens[i].scopes, 'markup.removed.diff')) {
-				newTags = removedResult.tags;
+				newTags = removedResult && removedResult.tags;
 				newIdx = { removed: removedIdx };
 			} else if (_.contains(tokens[i].scopes, 'markup.added.diff')) {
-				newTags = addedResult.tags;
+				newTags = addedResult && addedResult.tags;
 				newIdx = { added: addedIdx };
 			} else {
 				newTags = (addedResult && addedResult.tags) || (removedResult && removedResult.tags);
@@ -206,8 +216,10 @@
 						} else {
 							break;
 						}
-					} else {
+					} else if (isEndTag(newTags[j]) && newTags[j] === tagStack[tagStack.length - 1] - 1) {
 						tagStack.pop();
+					} else if (isEndTag(newTags[j])) {
+						replacementTags.push(newTags[j] + 1);
 					}
 					replacementTags.push(newTags[j]);
 				}

@@ -4,6 +4,7 @@
 _ = require 'underscore'
 path = require 'path'
 GrammarUtils = require '../lib/grammar-utils'
+shell = require('electron').shell
 
 module.exports =
   '1C (BSL)':
@@ -128,21 +129,21 @@ module.exports =
     if GrammarUtils.OperatingSystem.isDarwin()
       "File Based":
         command: "bash"
-        args: (context) -> ['-c', "xcrun clang++ -fcolor-diagnostics -Wc++11-extensions -Wall -include stdio.h -include iostream '" + context.filepath + "' -o /tmp/cpp.out && /tmp/cpp.out"]
+        args: (context) -> ['-c', "xcrun clang++ -fcolor-diagnostics -std=c++14 -Wall -include stdio.h -include iostream '" + context.filepath + "' -o /tmp/cpp.out && /tmp/cpp.out"]
     else if GrammarUtils.OperatingSystem.isLinux()
       "Selection Based":
         command: "bash"
         args: (context) ->
           code = context.getCode(true)
           tmpFile = GrammarUtils.createTempFileWithCode(code, ".cpp")
-          ["-c", "g++ -Wall -include stdio.h -include iostream '" + tmpFile + "' -o /tmp/cpp.out && /tmp/cpp.out"]
+          ["-c", "g++ -std=c++14 -Wall -include stdio.h -include iostream '" + tmpFile + "' -o /tmp/cpp.out && /tmp/cpp.out"]
       "File Based":
         command: "bash"
-        args: (context) -> ["-c", "g++ -Wall -include stdio.h -include iostream '" + context.filepath + "' -o /tmp/cpp.out && /tmp/cpp.out"]
+        args: (context) -> ["-c", "g++ -std=c++14 -Wall -include stdio.h -include iostream '" + context.filepath + "' -o /tmp/cpp.out && /tmp/cpp.out"]
     else if GrammarUtils.OperatingSystem.isWindows() and GrammarUtils.OperatingSystem.release().split(".").slice -1 >= '14399'
       "File Based":
         command: "bash"
-        args: (context) -> ["-c", "g++ -Wall -include stdio.h -include iostream '/mnt/" + path.posix.join.apply(path.posix, [].concat([context.filepath.split(path.win32.sep)[0].toLowerCase()], context.filepath.split(path.win32.sep).slice(1))).replace(":", "") + "' -o /tmp/cpp.out && /tmp/cpp.out"]
+        args: (context) -> ["-c", "g++ -std=c++14 -Wall -include stdio.h -include iostream '/mnt/" + path.posix.join.apply(path.posix, [].concat([context.filepath.split(path.win32.sep)[0].toLowerCase()], context.filepath.split(path.win32.sep).slice(1))).replace(":", "") + "' -o /tmp/cpp.out && /tmp/cpp.out"]
 
   Clojure:
     "Selection Based":
@@ -240,7 +241,7 @@ module.exports =
   'F*':
     "File Based":
       command: "fstar"
-      args: (context) -> ['--fsi', context.filepath]
+      args: (context) -> [context.filepath]
 
   Forth:
     "File Based":
@@ -394,6 +395,12 @@ module.exports =
         args = ['-c', "kotlinc #{context.filepath} -include-runtime -d /tmp/#{jarName} && java -jar /tmp/#{jarName}"]
         return args
 
+  LAMMPS:
+    if GrammarUtils.OperatingSystem.isDarwin() || GrammarUtils.OperatingSystem.isLinux()
+      "File Based":
+        command: "lammps"
+        args: (context) -> ['-log', 'none', '-in', context.filepath]
+
   LaTeX:
     "File Based":
       command: "latexmk"
@@ -485,7 +492,7 @@ module.exports =
   'MIPS Assembler':
     "File Based":
       command: "spim"
-      args: (context) -> [context.filepath]
+      args: (context) -> ['-f', context.filepath]
 
   MoonScript:
     "Selection Based":
@@ -646,6 +653,15 @@ module.exports =
       command: "bash"
       args: (context) -> ['-c', 'cd \"' + context.filepath.replace(/[^\/]*$/, '') + '\"; swipl -f \"' + context.filepath + '\" -t main --quiet']
 
+  PureScript:
+    "File Based":
+      command: if GrammarUtils.OperatingSystem.isWindows() then "cmd" else "bash"
+      args: (context) ->
+        if GrammarUtils.OperatingSystem.isWindows()
+          ['/c cd "' + context.filepath.replace(/[^\/]*$/, '') + '" && pulp run']
+        else
+          ['-c', 'cd "' + context.filepath.replace(/[^\/]*$/, '') + '" && pulp run']
+
   Python:
     "Selection Based":
       command: "python"
@@ -695,6 +711,16 @@ module.exports =
         else
           args = ['-c', "rebuild '#{progname}.native' && '#{progname}.native'"]
         return args
+
+  "Ren'Py":
+    "File Based":
+      command: "renpy"
+      args: (context) -> [context.filepath.substr(0, context.filepath.lastIndexOf("/game"))]
+
+  'Robot Framework':
+    "File Based":
+      command: 'robot'
+      args: (context) -> [context.filepath]
 
   RSpec:
     "Selection Based":
@@ -785,6 +811,14 @@ module.exports =
       command: "fish"
       args: (context) -> [context.filepath]
 
+  "SQL":
+    "Selection Based":
+      command: "echo"
+      args: (context) -> ['SQL requires setting \'Script: Run Options\' directly. See https://github.com/rgbkrk/atom-script/tree/master/examples/hello.sql for further information.']
+    "File Based":
+      command: "echo"
+      args: (context) -> ['SQL requires setting \'Script: Run Options\' directly. See https://github.com/rgbkrk/atom-script/tree/master/examples/hello.sql for further information.']
+
   "SQL (PostgreSQL)":
     "Selection Based":
       command: "psql"
@@ -824,13 +858,27 @@ module.exports =
 
   TypeScript:
     "Selection Based":
-      command: "bash"
-      args: (context) ->
-        code = context.getCode(true)
-        tmpFile = GrammarUtils.createTempFileWithCode(code, ".ts")
-        jsFile = tmpFile.replace /\.ts$/, ".js"
-        args = ['-c', "tsc --outFile '#{jsFile}' '#{tmpFile}' && node '#{jsFile}'"]
-        return args
+      command: "ts-node"
+      args: (context) -> ['-e', context.getCode()]
     "File Based":
-      command: "bash"
-      args: (context) -> ['-c', "tsc '#{context.filepath}' --outFile /tmp/js.out && node /tmp/js.out"]
+      command: "ts-node"
+      args: (context) -> [context.filepath]
+
+  VBScript:
+    'Selection Based':
+      command: 'cscript'
+      args: (context) ->
+        code = context.getCode()
+        tmpFile = GrammarUtils.createTempFileWithCode(code, ".vbs")
+        ['//NOLOGO',tmpFile]
+    'File Based':
+      command: 'cscript'
+      args: (context) -> ['//NOLOGO', context.filepath]
+
+  HTML:
+    "File Based":
+      command: 'echo'
+      args: (context) ->
+        uri = 'file://' + context.filepath
+        shell.openExternal(uri)
+        ['HTML file opened at:', uri]
